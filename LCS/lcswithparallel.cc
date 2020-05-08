@@ -9,42 +9,6 @@
 
 using namespace std;
 int chunk  = 10;
-
-class DNA_Strand{
-
-    private:
-        vector<char> strand;
-        unsigned int lenght = strand.capacity();
-
-    public:
-
-        char getStrandElementAtPos(int pos){
-            if(pos<lenght){
-                return strand.at(pos);
-            }else{
-                cout<<"Accessed the strand element out of limit"<<endl;
-                return ' ';
-            }
-        }
-
-        void displayStrand(){
-            for(auto it = strand.begin(); it!=strand.end();it++){
-                cout<< *it << " ";
-            }
-            cout<<endl;
-        }
-        bool addBaseStrand(char base){
-            if(base == 'A' || base == 'G' || base == 'C' || base== 'T'){
-                strand.push_back(base);
-                return true;
-            }else{
-                return false;
-            }
-
-        }
-
-};
-
 void printLCS(char *b,char X[],int i,int j,int lenght_Y){
     if (i<0 || j<0){
         return ;
@@ -202,8 +166,8 @@ int main(void){
     #pragma omp critical
        Datafile<<lenght_x<<","<<time_taken_withmem<<"\n";
 
-        free(X);
-        free(Y);
+        delete(X);
+        delete(Y);
     }
    }
     
