@@ -10,6 +10,8 @@ using namespace std;
 int chunk  = 10;
 
 
+
+
 char* randomDNAStrandGenerator(int lenOfStrand){
 
     char BASES[4] = {'A','C','T','G'};
@@ -23,11 +25,11 @@ char* randomDNAStrandGenerator(int lenOfStrand){
 
 }
 
-int lcswithMem( int lenght_x , int lenght_y, char *X, char *Y ){
+void lcswithMem( int lenght_x , int lenght_y, char *X, char *Y ,double *temp){
     int c[lenght_x+1][lenght_y+1];
     int i,j;
         
-   
+   clock_t start = clock();
 #pragma omp parallel for shared(X,Y,lenght_x,lenght_y,chunk,c) private(i) 
          for( i=1;i<lenght_x+1;i++){
          
@@ -57,9 +59,10 @@ int lcswithMem( int lenght_x , int lenght_y, char *X, char *Y ){
         
         
     }
-    
-     
-    return c[lenght_x][lenght_y];
+    clock_t end= clock();
+       temp[1] = double(end - start) / double(CLOCKS_PER_SEC);
+    temp[0] = c[lenght_x][lenght_y];
+   
 }
 
 
@@ -72,15 +75,16 @@ int main(void){
 	int lenght_x;
 	int lenght_y;
 	ofstream Datafile;
-	clock_t start, end;
+
 	char* X;
 	char* Y;
 	int k,i;
 	int lengthWithMem;
+	double temp_array[2];
 	
 	
 	Datafile.open("Memonic_with_para.txt");
-	 #pragma omp parallel private(k,X,Y,start,end) shared(Datafile)
+	 #pragma omp parallel private(k,X,Y,temp_array) shared(Datafile)
 	{
 	#pragma omp for 
 	for (k=0;k<2000;k++){
@@ -90,20 +94,19 @@ int main(void){
 		X = randomDNAStrandGenerator(lenght_x);
         Y = randomDNAStrandGenerator(lenght_y);
         	
-        	start = clock();
+        	
        
-         lengthWithMem = lcswithMem(lenght_x,lenght_y,X,Y);
-         end= clock();
-        double time_taken_withmem;
+         lcswithMem(lenght_x,lenght_y,X,Y,temp_array);
+         
         
        
-       time_taken_withmem = double(end - start) / double(CLOCKS_PER_SEC);
-       cout<<"lenght of the Longest common subsequence is "<<lengthWithMem<<endl;
+       
+       cout<<"lenght of the Longest common subsequence is "<<temp_array[0]<<endl;
       
-        cout<< "Time taken by program with memonization :"<< fixed<<time_taken_withmem<<setprecision(30)<<endl; 
+        cout<< "Time taken by program with memonization :"<< fixed<<temp_array[1]<<setprecision(30)<<endl; 
        #pragma omp critical
         {
-       Datafile<<lenght_x<<","<<time_taken_withmem<<"\n";
+       Datafile<<lenght_x<<","<<temp_array[1]<<"\n";
 }
         delete[] X;
         delete[] Y;
