@@ -6,34 +6,9 @@
 #include<omp.h>
 
 
-
 using namespace std;
 int chunk  = 10;
-void printLCS(char *b,char X[],int i,int j,int lenght_Y){
-    if (i<0 || j<0){
-        return ;
-    }
-    else if (*((b+i*(lenght_Y))+j) == '^')
-    {
 
-        printLCS(b,X,i-1,j-1,lenght_Y);
-        cout<<X[i]<<" ";
-
-    }
-    else if (*((b+i*(lenght_Y))+j) == '>')
-    {
-
-        printLCS(b,X,i-1,j,lenght_Y);
-
-    }
-    else{
-
-        printLCS(b,X,i,j-1,lenght_Y);
-
-    }
-
-
-}
 
 char* randomDNAStrandGenerator(int lenOfStrand){
 
@@ -48,33 +23,21 @@ char* randomDNAStrandGenerator(int lenOfStrand){
 
 }
 
-int lcsWithoutMem(char *X, char *Y, int m , int n){
-    if(m==0 || n==0){
-        return 0;
-    }
-    else if(X[m-1]==Y[n-1]){
-        return 1+ lcsWithoutMem(X,Y,m-1,n-1);
-    }
-    else {
-        int temp1 =lcsWithoutMem(X,Y, m,n-1);
-        int temp2 = lcsWithoutMem(X,Y,m-1,n);
-        return (temp1 > temp2)? temp1 : temp2;
-    }
-}
-
 int lcswithMem( int lenght_x , int lenght_y, char *X, char *Y ){
     int c[lenght_x+1][lenght_y+1];
     int i,j;
-    #pragma omp parallel for shared(X,Y,lenght_x,lenght_y,chunk,c) private(i) schedule(dynamic,chunk)
-
+        
+   
+#pragma omp parallel for shared(X,Y,lenght_x,lenght_y,chunk,c) private(i) 
          for( i=1;i<lenght_x+1;i++){
+         
         c[i][0] = 0;
     }
-    #pragma omp parallel for shared(X,Y,lenght_x,lenght_y,chunk,c) private(i) schedule(dynamic,chunk)
+ #pragma omp parallel for shared(X,Y,lenght_x,lenght_y,chunk,c) private(i) 
     for (i = 0; i<lenght_y+1;i++){
         c[0][i] = 0;
     }
-    #pragma omp parallel for collapse(2) shared(X,Y,lenght_x,lenght_y,chunk,c) private(i,j) schedule(dynamic,chunk)
+  #pragma omp parallel for collapse(2) shared(X,Y,lenght_x,lenght_y,chunk,c) private(i,j)
     for( i=1; i<=(lenght_x);i++){
      
         for( j=1;j<=(lenght_y);j++){
@@ -100,89 +63,65 @@ int lcswithMem( int lenght_x , int lenght_y, char *X, char *Y ){
 }
 
 
+
+
+
+
 int main(void){
-     srand(time(NULL));
-    int lenght_x;
-    int lenght_y ;
-    ofstream Datafile;
-    
-    //char X[]= {'A','C','C','G','G','T','C','G','A','G','T','G','C','G','C','G','G','A','A','G','C','C','G','G','C','C','G','A','A'};
-    //char Y[]= {'G','T','C','G','T','T','C','G','G','A','A','T','G','C','C','G','T','T','G','C','T','C','T','G','T','A','A','A'};
-
-    //char X[] = { 'A','B', 'C', 'B', 'D', 'A', 'B' };
-    //char Y[] = { 'B', 'D', 'C', 'A', 'B', 'A' };
-    //lenght_y =sizeof(Y);
-    //lenght_x = sizeof(X);
-
-
-   
-    clock_t start, end;
-    
-
-
-
-
-
-
-    char* X;
-    char* Y;
-    int k;
-    int lengthWithMem;
-
-    Datafile.open("run_time_memonic_with_para.txt");
-  int i;
-   #pragma omp parallel shared(chunk,Datafile) private(lenght_x,lenght_y,X,Y,k,start,end,lengthWithMem)
-   {
-       #pragma omp for schedule(dynamic, chunk)
-       for( k=1;k<=2000;k++){
-       
-        lenght_x = lenght_y  = k;
-
-    cout<<"lenght of strand X: "<<lenght_x<<"\n"<<"lenght of strand Y: "<<lenght_y<<endl;
-        X = randomDNAStrandGenerator(lenght_x);
+	srand(time(NULL));
+	int lenght_x;
+	int lenght_y;
+	ofstream Datafile;
+	clock_t start, end;
+	char* X;
+	char* Y;
+	int k,i;
+	int lengthWithMem;
+	
+	
+	Datafile.open("Memonic_with_para.txt");
+	 #pragma omp parallel private(k,X,Y,start,end) shared(Datafile)
+	{
+	#pragma omp for 
+	for (k=0;k<2000;k++){
+		cout<<"thread Number"<<omp_get_thread_num()<<" "<<k<<endl;
+		lenght_x= lenght_y=k;
+		cout<<"lenght of strand X: "<<lenght_x<<"\n"<<"lenght of strand Y: "<<lenght_y<<endl;
+		X = randomDNAStrandGenerator(lenght_x);
         Y = randomDNAStrandGenerator(lenght_y);
-        //clock_gettime(CLOCK_MONOTONIC, &start); 
-        /*start = clock();
-        int lengthWithoutMem = lcsWithoutMem(X,Y,lenght_x,lenght_y);
-        end= clock();
-       // clock_gettime(CLOCK_MONOTONIC, &end); 
-        double time_taken_withoutmem; 
-        time_taken_withoutmem =  double(end - start) / double(CLOCKS_PER_SEC);
-       // time_taken_withoutmem = (end.tv_sec - start.tv_sec) * 1e9; 
-       // time_taken_withoutmem = (time_taken_withoutmem + (end.tv_nsec - start.tv_nsec)) * 1e-9;*/
-       start = clock();
-        //clock_gettime(CLOCK_MONOTONIC, &start); 
+        	
+        	start = clock();
+       
          lengthWithMem = lcswithMem(lenght_x,lenght_y,X,Y);
-       // clock_gettime(CLOCK_MONOTONIC, &end);
          end= clock();
         double time_taken_withmem;
-       // time_taken_withmem = (end.tv_sec - start.tv_sec) * 1e9; 
-       // time_taken_withmem = (time_taken_withmem + (end.tv_nsec - start.tv_nsec)) * 1e-9;
+        
+       
        time_taken_withmem = double(end - start) / double(CLOCKS_PER_SEC);
-
-        cout<<"lenght of the Longest common subsequence is "<<lengthWithMem<<endl;
-       // cout << "Time taken by program recusively is : " << fixed << time_taken_withoutmem << setprecision(15) <<endl;
-        cout<< "Time taken by program with memonization :"<< fixed<<time_taken_withmem<<setprecision(15)<<endl; 
-    #pragma omp critical
+       cout<<"lenght of the Longest common subsequence is "<<lengthWithMem<<endl;
+      
+        cout<< "Time taken by program with memonization :"<< fixed<<time_taken_withmem<<setprecision(30)<<endl; 
+       #pragma omp critical
+        {
        Datafile<<lenght_x<<","<<time_taken_withmem<<"\n";
-
-        delete(X);
-        delete(Y);
-    }
-   }
+}
+        delete[] X;
+        delete[] Y;
+	}
     
+    
+	
+}
 
     
    Datafile.close();
 
-   
 
 
-    
-    /*cout<<"LCS of X and Y is ....."<<endl;
-    printLCS((char *)b,X,lenght_x-1,lenght_y-1,lenght_y);
-    cout<<endl;*/
-    
-   
+
+
+
+
+
+
 }
-
