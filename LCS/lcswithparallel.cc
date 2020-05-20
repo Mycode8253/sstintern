@@ -110,7 +110,7 @@ int main(void){
         cout<< "Time taken by program with memonization :"<< fixed<<temp_array[1]<<setprecision(30)<<endl; 
        #pragma omp critical
         {
-       Datafile<<lenght_x<<","<<temp_array[1]<<"\n";
+       Datafile<<lenght_x<<","<<temp_array[1]<<setprecision(30)<<"\n";
 }
         delete[] X;
         delete[] Y;
