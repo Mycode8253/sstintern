@@ -8,7 +8,6 @@
 
 using namespace std;
 
-
 void printLCS(char *b,char X[],int i,int j,int lenght_Y){
     if (i<0 || j<0){
         return ;
@@ -121,7 +120,7 @@ int main(void){
 
     Datafile.open("run_time1.txt");
 
-    for(int k=1;k<10000;k++){
+    for(int k=1;k<50;k++){
         char* X;
         char* Y;
         lenght_x = lenght_y  = k;
@@ -130,32 +129,32 @@ int main(void){
         X = randomDNAStrandGenerator(lenght_x);
         Y = randomDNAStrandGenerator(lenght_y);
         //clock_gettime(CLOCK_MONOTONIC, &start); 
-      /*  start = clock();
+        start = clock();
         int lengthWithoutMem = lcsWithoutMem(X,Y,lenght_x,lenght_y);
         end= clock();
        // clock_gettime(CLOCK_MONOTONIC, &end); 
         double time_taken_withoutmem; 
-        time_taken_withoutmem =  double(end - start) / double(CLOCKS_PER_SEC);*/
+        time_taken_withoutmem =  double(end - start) / double(CLOCKS_PER_SEC);
        // time_taken_withoutmem = (end.tv_sec - start.tv_sec) * 1e9; 
        // time_taken_withoutmem = (time_taken_withoutmem + (end.tv_nsec - start.tv_nsec)) * 1e-9;
-       start = clock();
+       //start = clock();
         //clock_gettime(CLOCK_MONOTONIC, &start); 
-        int lengthWithMem = lcswithMem(lenght_x,lenght_y,X,Y);
+       // int lengthWithMem = lcswithMem(lenght_x,lenght_y,X,Y);
        // clock_gettime(CLOCK_MONOTONIC, &end);
-         end= clock();
-        double time_taken_withmem;
+         //end= clock();
+        //double time_taken_withmem;
        // time_taken_withmem = (end.tv_sec - start.tv_sec) * 1e9; 
        // time_taken_withmem = (time_taken_withmem + (end.tv_nsec - start.tv_nsec)) * 1e-9;
-       time_taken_withmem = double(end - start) / double(CLOCKS_PER_SEC);
+       //time_taken_withmem = double(end - start) / double(CLOCKS_PER_SEC);
 
-        cout<<"lenght of the Longest common subsequence is "<<lengthWithMem<<endl;
-       //cout << "Time taken by program recusively is : " << fixed << time_taken_withoutmem << setprecision(15) <<endl;
-        cout<< "Time taken by program with memonization :"<< fixed<<time_taken_withmem<<setprecision(30)<<endl; 
+       // cout<<"lenght of the Longest common subsequence is "<<lengthWithMem<<endl;
+        cout << "Time taken by program recusively is : " << fixed << time_taken_withoutmem << setprecision(15) <<endl;
+        //cout<< "Time taken by program with memonization :"<< fixed<<time_taken_withmem<<setprecision(15)<<endl; 
 
-        Datafile<<lenght_x<<","<<time_taken_withmem<<"\n";
+        Datafile<<lenght_x<<","<<time_taken_withoutmem<<"\n";
 
-        delete(X);
-        delete(Y);
+        free(X);
+        free(Y);
     }
     Datafile.close();
 

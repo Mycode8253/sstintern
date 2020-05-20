@@ -28,7 +28,8 @@ char* randomDNAStrandGenerator(int lenOfStrand){
 void lcswithMem( int lenght_x , int lenght_y, char *X, char *Y ,double *temp){
     int c[lenght_x+1][lenght_y+1];
     int i,j;
-        
+//#pragma omp critical
+//{
    clock_t start = clock();
 #pragma omp parallel for shared(X,Y,lenght_x,lenght_y,chunk,c) private(i) 
          for( i=1;i<lenght_x+1;i++){
@@ -60,9 +61,11 @@ void lcswithMem( int lenght_x , int lenght_y, char *X, char *Y ,double *temp){
         
     }
     clock_t end= clock();
+
+
        temp[1] = double(end - start) / double(CLOCKS_PER_SEC);
     temp[0] = c[lenght_x][lenght_y];
-   
+	   
 }
 
 
@@ -81,13 +84,14 @@ int main(void){
 	int k,i;
 	int lengthWithMem;
 	double temp_array[2];
+	clock_t programstart,programend;
+	programstart  = clock();
 	
-	
-	Datafile.open("Memonic_with_para.txt");
+	Datafile.open("run_time_memonic_with_para.txt");
 	 #pragma omp parallel private(k,X,Y,temp_array) shared(Datafile)
 	{
 	#pragma omp for 
-	for (k=0;k<2000;k++){
+	for (k=0;k<10000;k+=1){
 		cout<<"thread Number"<<omp_get_thread_num()<<" "<<k<<endl;
 		lenght_x= lenght_y=k;
 		cout<<"lenght of strand X: "<<lenght_x<<"\n"<<"lenght of strand Y: "<<lenght_y<<endl;
@@ -118,7 +122,8 @@ int main(void){
 
     
    Datafile.close();
-
+	programend = clock();
+	cout<<"Time takne by the program  to complete ::"<<double(programend - programstart) / double(CLOCKS_PER_SEC);
 
 
 
