@@ -3,7 +3,7 @@
 #include<vector>
 #include<bits/stdc++.h>
 #include <fstream>
-
+#include <omp.h>
 
 
 using namespace std;
@@ -48,15 +48,22 @@ char* randomDNAStrandGenerator(int lenOfStrand){
 }
 
 int lcsWithoutMem(char *X, char *Y, int m , int n){
+int temp1, temp2, temp3;
     if(m==0 || n==0){
         return 0;
     }
     else if(X[m-1]==Y[n-1]){
-        return 1+ lcsWithoutMem(X,Y,m-1,n-1);
+        #pragma omp task shared(temp3)  firstprivate(X,Y,m,n)
+         temp3 = 1+ lcsWithoutMem(X,Y,m-1,n-1);
+        return temp3;
     }
     else {
-        int temp1 =lcsWithoutMem(X,Y, m,n-1);
-        int temp2 = lcsWithoutMem(X,Y,m-1,n);
+        #pragma omp task shared(temp1)  firstprivate(X,Y,m,n)
+        temp1 =lcsWithoutMem(X,Y, m,n-1);
+        #pragma omp task shared(temp2)  firstprivate(X,Y,m,n)
+         temp2 = lcsWithoutMem(X,Y,m-1,n);
+
+        #pragma omp taskwait
         return (temp1 > temp2)? temp1 : temp2;
     }
 }
@@ -118,11 +125,18 @@ int main(void){
    
 
 
-    Datafile.open("run_time1.txt");
-
-    for(int k=1;k<50;k++){
-        char* X;
+    Datafile.open("run_time_openmp_nomemonic.txt");
+    int k=0;
+    double time_taken_withoutmem;
+     char* X;
         char* Y;
+    #pragma omp parallel  private(X,Y, lenght_x,lenght_y,k,start,end,time_taken_withoutmem) shared(Datafile)
+    {
+
+    #pragma omp for
+    for( k=1;k<50;k++){
+        cout<<"I am the thread that is executing :"<<omp_get_thread_num()<<endl;
+       
         lenght_x = lenght_y  = k;
 
     cout<<"lenght of strand X: "<<lenght_x<<"\n"<<"lenght of strand Y: "<<lenght_y<<endl;
@@ -133,7 +147,7 @@ int main(void){
         int lengthWithoutMem = lcsWithoutMem(X,Y,lenght_x,lenght_y);
         end= clock();
        // clock_gettime(CLOCK_MONOTONIC, &end); 
-        double time_taken_withoutmem; 
+         
         time_taken_withoutmem =  double(end - start) / double(CLOCKS_PER_SEC);
        // time_taken_withoutmem = (end.tv_sec - start.tv_sec) * 1e9; 
        // time_taken_withoutmem = (time_taken_withoutmem + (end.tv_nsec - start.tv_nsec)) * 1e-9;
@@ -156,8 +170,11 @@ int main(void){
         free(X);
         free(Y);
     }
+    #pragma omp critical 
+    {
     Datafile.close();
-
+}
+}
    
 
 
