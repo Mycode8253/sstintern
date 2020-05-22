@@ -88,9 +88,8 @@ int main(void){
 	programstart  = clock();
 	
 	Datafile.open("run_time_memonic_with_para.txt");
-	 #pragma omp parallel private(k,X,Y,temp_array) shared(Datafile)
+	 //#pragma omp parallel private(k,X,Y,temp_array) shared(Datafile)
 	{
-	#pragma omp for 
 	for (k=0;k<10000;k+=1){
 		cout<<"thread Number"<<omp_get_thread_num()<<" "<<k<<endl;
 		lenght_x= lenght_y=k;
