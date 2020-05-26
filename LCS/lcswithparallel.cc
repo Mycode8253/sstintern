@@ -4,7 +4,7 @@
 #include<bits/stdc++.h>
 #include <fstream>
 #include<omp.h>
-
+#include<chrono>
 
 using namespace std;
 int chunk  = 10;
@@ -25,22 +25,23 @@ char* randomDNAStrandGenerator(int lenOfStrand){
 
 }
 
-void lcswithMem( int lenght_x , int lenght_y, char *X, char *Y ,double *temp){
+void lcswithMem( int lenght_x , int lenght_y, char *X, char *Y ,double *temp,int num_of_thread){
     int c[lenght_x+1][lenght_y+1];
     int i,j;
 //#pragma omp critical
 //{
-   clock_t start = clock();
-#pragma omp parallel for shared(X,Y,lenght_x,lenght_y,chunk,c) private(i) 
+  omp_set_dynamic(0);
+   auto start = std::chrono::high_resolution_clock::now();
+#pragma omp parallel for shared(X,Y,lenght_x,lenght_y,chunk,c) private(i) num_threads(num_of_thread)
          for( i=1;i<lenght_x+1;i++){
          
         c[i][0] = 0;
     }
- #pragma omp parallel for shared(X,Y,lenght_x,lenght_y,chunk,c) private(i) 
+ #pragma omp parallel for shared(X,Y,lenght_x,lenght_y,chunk,c) private(i) num_threads(num_of_thread)
     for (i = 0; i<lenght_y+1;i++){
         c[0][i] = 0;
     }
-  #pragma omp parallel for collapse(2) shared(X,Y,lenght_x,lenght_y,chunk,c) private(i,j)
+  #pragma omp parallel for collapse(2) shared(X,Y,lenght_x,lenght_y,chunk,c) private(i,j) num_threads(num_of_thread)
     for( i=1; i<=(lenght_x);i++){
      
         for( j=1;j<=(lenght_y);j++){
@@ -60,10 +61,9 @@ void lcswithMem( int lenght_x , int lenght_y, char *X, char *Y ,double *temp){
         
         
     }
-    clock_t end= clock();
-
-
-       temp[1] = double(end - start) / double(CLOCKS_PER_SEC);
+  	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = end-start;
+       temp[1] =elapsed.count();
     temp[0] = c[lenght_x][lenght_y];
 	   
 }
@@ -84,22 +84,22 @@ int main(void){
 	int k,i;
 	int lengthWithMem;
 	double temp_array[2];
-	clock_t programstart,programend;
-	programstart  = clock();
+
+	auto programstart= std::chrono::high_resolution_clock::now();
 	
 	Datafile.open("run_time_memonic_with_para.txt");
 	 //#pragma omp parallel private(k,X,Y,temp_array) shared(Datafile)
 	{
-	for (k=0;k<10000;k+=1){
-		cout<<"thread Number"<<omp_get_thread_num()<<" "<<k<<endl;
-		lenght_x= lenght_y=k;
+	for (k=1;k<=20;k+=1){
+		cout<<"thread Number"<<omp_get_num_threads()<<" "<<k<<endl;
+		lenght_x= lenght_y=100000;
 		cout<<"lenght of strand X: "<<lenght_x<<"\n"<<"lenght of strand Y: "<<lenght_y<<endl;
 		X = randomDNAStrandGenerator(lenght_x);
         Y = randomDNAStrandGenerator(lenght_y);
         	
         	
        
-         lcswithMem(lenght_x,lenght_y,X,Y,temp_array);
+         lcswithMem(lenght_x,lenght_y,X,Y,temp_array,k);
          
         
        
@@ -109,7 +109,7 @@ int main(void){
         cout<< "Time taken by program with memonization :"<< fixed<<temp_array[1]<<setprecision(30)<<endl; 
        #pragma omp critical
         {
-       Datafile<<lenght_x<<","<<temp_array[1]<<setprecision(30)<<"\n";
+       Datafile<<k<<","<<temp_array[1]<<setprecision(30)<<"\n";
 }
         delete[] X;
         delete[] Y;
@@ -121,9 +121,9 @@ int main(void){
 
     
    Datafile.close();
-	programend = clock();
-	cout<<"Time takne by the program  to complete ::"<<double(programend - programstart) / double(CLOCKS_PER_SEC);
-
+	auto programend = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = programend-programstart;
+	cout<<"Time takne by the program  to complete ::"<<elapsed.count()<<endl;
 
 
 

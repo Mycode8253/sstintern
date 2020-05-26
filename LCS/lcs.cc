@@ -118,7 +118,7 @@ int main(void){
    
 
 
-    Datafile.open("run_time1.txt");
+    Datafile.open("resultsfromlcs.txt");
 
     for(int k=1;k<50;k++){
         char* X;
@@ -166,6 +166,4 @@ int main(void){
     printLCS((char *)b,X,lenght_x-1,lenght_y-1,lenght_y);
     cout<<endl;*/
     
-   
-}
-
+  

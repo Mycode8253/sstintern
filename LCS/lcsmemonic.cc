@@ -119,7 +119,7 @@ int main(void){
    
 
 
-    Datafile.open("run_time1.txt");
+    Datafile.open("result_from_lcs_memonic.txt");
 
     for(int k=1;k<10000;k++){
         char* X;

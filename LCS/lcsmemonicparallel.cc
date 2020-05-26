@@ -165,7 +165,7 @@ int main(void){
     int k;
     int lengthWithMem;
 
-    Datafile.open("run_time_memonic_with_para.txt");
+    Datafile.open("results_from_memonic_with_para.txt");
   int i;
    #pragma omp parallel shared(chunk,Datafile) private(lenght_x,lenght_y,X,Y,k,start,end,lengthWithMem)
    {
